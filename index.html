@@ -3,49 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jefatura de Estudios</title>
+    <title>Jefatura de Estudios — EduAusencias</title>
     <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            font-family: system-ui, -apple-system, sans-serif;
-            background: #f8fafc;
-            color: #334155;
-            margin: 0;
-            text-align: center;
-        }
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #cbd5e1;
-            border-top: 4px solid #2563eb;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 16px;
-        }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
+        #loader { position: fixed; top:0; left:0; width:100%; height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center; background:#f8fafc; z-index:10; }
+        .spinner { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-top: 4px solid #1e40af; border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        a { color: #2563eb; text-decoration: none; font-weight: bold; }
+        iframe { width:100%; height:100%; border:none; display:block; }
     </style>
 </head>
 <body>
-
-    <div class="spinner"></div>
-    <h3>Conectando con el Portal de Jefatura...</h3>
-    <p id="subtext">Redirigiendo automáticamente...</p>
-    <p><a id="manualLink" href="#">Haz clic aquí si no redirige automáticamente</a></p>
-
+    <div id="loader">
+        <div class="spinner"></div>
+        <p style="margin-top: 15px; color: #64748b; font-size: 14px;">Abriendo Portal de Jefatura...</p>
+    </div>
+    <iframe id="appFrame" src=""></iframe>
     <script>
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxArmYbHCtK_8m68ar3NyD-8ik1y4i8bjuofvkcHAsomXkGT-MNVX5aJPWy6OKMk9rD/exec";
-        const PARAMS = "?p=admin";
-        const destino = WEB_APP_URL + PARAMS;
-
-        document.getElementById('manualLink').href = destino;
-
-        // Redirección inmediata al destino de Google Apps Script
-        window.location.replace(destino);
+        const iframe = document.getElementById('appFrame');
+        iframe.src = WEB_APP_URL + "?p=admin";
+        iframe.onload = () => { document.getElementById('loader').style.display = 'none'; };
     </script>
 </body>
 </html>
