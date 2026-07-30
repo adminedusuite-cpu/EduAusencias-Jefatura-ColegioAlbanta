@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solicitud de Ausencias - Colegio Albanta</title>
+    <!-- NUEVO LOGO PERSONALIZADO PARA PANTALLA DE INICIO MÓVIL (PROFESORES) -->
+    <link rel="apple-touch-icon" href="https://lh3.googleusercontent.com/d/1PbbDgaUP66KxBUl_RDZtwHjVmolV6qkD">
+    <link rel="apple-touch-icon" sizes="180x180" href="https://lh3.googleusercontent.com/d/1PbbDgaUP66KxBUl_RDZtwHjVmolV6qkD">
+    <link rel="icon" type="image/png" sizes="192x192" href="https://lh3.googleusercontent.com/d/1PbbDgaUP66KxBUl_RDZtwHjVmolV6qkD">
+    <meta name="apple-mobile-web-app-title" content="Ausencias Albanta">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <!-- Se añade SweetAlert2 para mostrar alertas estéticas y tics de confirmación -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root {
+            --primary: #008738;
+            --secondary: #0f172a;
+            --background: #f8fafc;
+            --surface: #ffffff;
+            --text: #334155;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body { background-color: var(--background); color: var(--text); padding: 20px; line-height: 1.6; }
+
+        .form-container {
+            max-width: 600px;
+            margin: 40px auto;
+            background: var(--surface);
+            padding: 35px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .header-block {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .logo-img {
+            max-width: 85px;
+            margin-bottom: 12px;
+        }
+
+        h2 { color: var(--secondary); font-size: 22px; font-weight: 700; }
+        p.subtitle { color: var(--text-light); font-size: 14px; margin-top: 4px; }
+
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-weight: 500; margin-bottom: 8px; color: var(--secondary); font-size: 14px; }
+        
+        input[type="text"], input[type="date"], select, input[type="file"] {
+            width: 100%; padding: 11px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; color: var(--text); background-color: #fff; transition: border-color 0.2s;
+        }
+        input:focus, select:focus { outline: none; border-color: var(--primary); }
+
+        .slots-container { background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+        .shortcut-buttons { display: flex; gap: 10px; margin-bottom: 12px; }
+        .btn-sm-action { background: #e2e8f0; border: none; padding: 5px 10px; font-size: 11px; font-weight: 500; border-radius: 6px; cursor: pointer; color: var(--text); }
+        .btn-sm-action:hover { background: #cbd5e1; }
+
+        .slots-wrapper { display: flex; flex-direction: column; gap: 8px; }
+        .slot-checkbox { display: flex; align-items: center; background: white; padding: 10px; border-radius: 6px; border: 1px solid var(--border); cursor: pointer; font-size: 13.5px; }
+        .slot-checkbox input { margin-right: 10px; width: 16px; height: 16px; accent-color: var(--primary); }
+
+        .btn-submit { width: 100%; background-color: var(--primary); color: white; border: none; padding: 13px; font-size: 15px; font-weight: 600; border-radius: 8px; cursor: pointer; transition: background-color 0.2s; }
+        .btn-submit:hover { background-color: #006e2d; }
+        .btn-submit:disabled { background-color: #94a3b8; cursor: not-allowed; }
+
+        /* Ajustes visuales para SweetAlert2 para mantener los colores corporativos de Albanta */
+        .swal2-styled.swal2-confirm {
+            background-color: var(--primary) !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="form-container">
+        <div class="header-block">
+            <img class="logo-img" src="https://lh3.googleusercontent.com/d/178SFIlZhIsD4E8ntUnqkiRyJhdHl7ri3" alt="Logo Colegio Albanta">
+            <h2>Notificación de Ausencias</h2>
+            <p class="subtitle">Portal del Profesorado - Colegio Albanta</p>
+        </div>
+
+        <form id="formAusenciaProfesor">
+            <div class="form-group">
+                <label>Nombre del Profesor/a</label>
+                <select id="nombreProfesor" required>
+                    <option value="">Cargando lista de profesores autorizados...</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Fecha de la Ausencia</label>
+                <input type="date" id="fechaAusencia" required>
+            </div>
+
+            <div class="form-group">
+                <label>Etapa Educativa y Materia</label>
+                <select id="etapaMateria" required>
+                    <option value="">-- Selecciona una materia o área --</option>
+                    <optgroup label="Educación Infantil (Áreas LOMLOE)">
+                        <option value="Infantil - Crecimiento en Armonía">Infantil | Crecimiento en Armonía</option>
+                        <option value="Infantil - Descubrimiento y Exploración del Entorno">Infantil | Descubrimiento y Exploración del Entorno</option>
+                        <option value="Infantil - Comunicación y Representación de la Realidad">Infantil | Comunicación y Representación de la Realidad</option>
+                    </optgroup>
+                    <optgroup label="Educación Primaria (Áreas LOMLOE)">
+                        <option value="Primaria - Conocimiento del Medio Natural, Social y Cultural">Primaria | Conocimiento del Medio Natural, Social y Cultural</option>
+                        <option value="Primaria - Educación Artística (Plástica/Música)">Primaria | Educación Artística (Plástica/Música)</option>
+                        <option value="Primaria - Educación Física">Primaria | Educación Física</option>
+                        <option value="Primaria - Lengua Castellana y Literatura">Primaria | Lengua Castellana y Literatura</option>
+                        <option value="Primaria - Lengua Extranjera (Inglés)">Primaria | Lengua Extranjera (Inglés)</option>
+                        <option value="Primaria - Matemáticas">Primaria | Matemáticas</option>
+                        <option value="Primaria - Educación en Valores Cívicos y Éticos">Primaria | Educación en Valores Cívicos y Éticos</option>
+                        <option value="Primaria - Religión / Atención Educativa">Primaria | Religión / Atención Educativa</option>
+                    </optgroup>
+                    <optgroup label="Educación Secundaria (ESO)">
+                        <option value="Secundaria - Biología y Geología">Secundaria | Biología y Geología</option>
+                        <option value="Secundaria - Física y Química">Secundaria | Física y Química</option>
+                        <option value="Secundaria - Educación Física">Secundaria | Educación Física</option>
+                        <option value="Secundaria - Geografía e Historia">Secundaria | Geografía e Historia</option>
+                        <option value="Secundaria - Lengua Castellana y Literatura">Secundaria | Lengua Castellana y Literatura</option>
+                        <option value="Secundaria - Lengua Extranjera (Inglés)">Secundaria | Lengua Extranjera (Inglés)</option>
+                        <option value="Secundaria - Matemáticas">Secundaria | Matemáticas</option>
+                        <option value="Secundaria - Educación Plástica, Visual y Audiovisual">Secundaria | Educación Plástica, Visual y Audiovisual</option>
+                        <option value="Secundaria - Música">Secundaria | Música</option>
+                        <option value="Secundaria - Tecnología y Digitalización">Secundaria | Tecnología y Digitalización</option>
+                        <option value="Secundaria - Filosofía / Valores Cívicos">Secundaria | Filosofía / Valores Cívicos</option>
+                    </optgroup>
+                </select>
+            </div>
+
+            <div class="form-group" id="contenedorCalendario" style="display:none;">
+                <label>Periodo Escolar</label>
+                <select id="calendarioTipo">
+                    <option value="octubre_mayo">Octubre a Mayo (Jornada Completa/Partida)</option>
+                    <option value="junio_septiembre">Junio / Septiembre (Jornada Continua)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Sesiones / Horas Afectadas</label>
+                <div class="slots-container">
+                    <div class="shortcut-buttons">
+                        <button type="button" class="btn-sm-action" onclick="seleccionarTodas(true)">Seleccionar todas</button>
+                        <button type="button" class="btn-sm-action" onclick="seleccionarTodas(false)">Deseleccionar todas</button>
+                    </div>
+                    <div class="slots-wrapper" id="slotsGrid"></div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Adjuntar Documento Tareas</label>
+                <input type="file" id="justificanteArchivo" accept=".pdf,.png,.jpg,.jpeg">
+                <span style="font-size: 11px; color: var(--text-light); display: block; margin-top: 4px;">Opcional (Formatos admitidos: PDF, PNG, JPG)</span>
+            </div>
+
+            <button type="submit" id="btnSubmit" class="btn-submit">Enviar Notificación de Ausencia</button>
+        </form>
+    </div>
+
+    <script>
+        const horarios = {
+            Infantil_Primaria: {
+                junio_septiembre: ["9.00 - 9.45", "9.45 - 10.30", "10.30 - 11.15", "11.45 - 12.30", "12.30 - 13.15", "13.15 - 14.00"],
+                octubre_mayo: ["9.30 - 10.30", "10.30 - 11.15", "11.45 - 12.45", "12.45 - 13.30", "15.00 - 16.00", "16.00 - 16.45"]
+            },
+            Secundaria: {
+                lunes_miercoles: ["8.25 - 9.20", "9.20 - 10.15", "10.30 - 11.25", "11.25 - 12.20", "12.35 - 13.30", "13.30 - 14.25", "14.25 - 15.20"],
+                jueves_viernes: ["8.25 - 9.20", "9.20 - 10.15", "10.30 - 11.25", "11.25 - 12.20", "12.35 - 13.30", "13.30 - 14.25"]
+            }
+        };
+
+        window.onload = function() {
+            var hoy = new Date();
+            var yyyy = hoy.getFullYear();
+            var mm = String(hoy.getMonth() + 1).padStart(2, '0');
+            var dd = String(hoy.getDate()).padStart(2, '0');
+            document.getElementById('fechaAusencia').value = yyyy + '-' + mm + '-' + dd;
+            
+            cargarProfesoresCompleto();
+            detectarMesYHorario();
+        };
+
+        function generarFechaSegura(fechaCadena) {
+            if(!fechaCadena) return new Date();
+            var partes = fechaCadena.split('-');
+            return new Date(partes[0], partes[1] - 1, partes[2]);
+        }
+
+        function cargarProfesoresCompleto() {
+            google.script.run
+                .withSuccessHandler(function(profesores) {
+                    const select = document.getElementById('nombreProfesor');
+                    if(!profesores || profesores.length === 0) {
+                        select.innerHTML = '<option value="">⚠️ No se encontraron profesores en la hoja</option>';
+                        return;
+                    }
+                    select.innerHTML = '<option value="">-- Selecciona tu nombre --</option>';
+                    profesores.forEach(function(profe) {
+                        const option = document.createElement('option');
+                        option.value = profe.nombre;
+                        option.innerText = profe.nombre;
+                        select.appendChild(option);
+                    });
+                })
+                .withFailureHandler(function(err) {
+                    Swal.fire({
+                        title: 'Error de carga',
+                        text: 'Error crítico al cargar profesores: ' + err.message,
+                        icon: 'error',
+                        confirmButtonText: 'Cerrar'
+                    });
+                    document.getElementById('nombreProfesor').innerHTML = '<option value="">❌ Error al conectar con el servidor</option>';
+                })
+                .obtenerListaProfesoresReal("direccion");
+        }
+
+        function detectarMesYHorario() {
+            var fechaVal = document.getElementById('fechaAusencia').value;
+            var etapaMateria = document.getElementById('etapaMateria').value;
+            if(!fechaVal) return;
+            
+            var fechaObj = generarFechaSegura(fechaVal);
+            var mes = fechaObj.getMonth(); 
+            var calendarioSelect = document.getElementById('calendarioTipo');
+            var contenedorCal = document.getElementById('contenedorCalendario');
+
+            var optSecundariaAnterior = calendarioSelect.querySelector('option[value="secundaria_completo"]');
+            if(optSecundariaAnterior) optSecundariaAnterior.remove();
+
+            if (etapaMateria && etapaMateria.indexOf("Secundaria") === 0) {
+                contenedorCal.style.display = "none";
+                var optSecundaria = document.createElement('option');
+                optSecundaria.value = "secundaria_completo";
+                optSecundaria.text = "Septiembre a Junio (Secundaria)";
+                optSecundaria.selected = true;
+                calendarioSelect.add(optSecundaria);
+                calendarioSelect.disabled = true;
+            } else {
+                contenedorCal.style.display = "block";
+                calendarioSelect.disabled = false;
+                if(mes === 5 || mes === 8) {
+                    calendarioSelect.value = "junio_septiembre";
+                } else {
+                    calendarioSelect.value = "octubre_mayo";
+                }
+            }
+            actualizarFranjasHorarias();
+        }
+
+        function actualizarFranjasHorarias() {
+            var tipoCalendario = document.getElementById('calendarioTipo').value || "octubre_mayo";
+            var etapaMateria = document.getElementById('etapaMateria').value || "";
+            var fechaVal = document.getElementById('fechaAusencia').value;
+            var grid = document.getElementById('slotsGrid');
+            
+            if (!grid) return;
+            grid.innerHTML = '';
+            var sesiones = [];
+
+            if (etapaMateria && etapaMateria.indexOf("Secundaria") === 0) {
+                var diaSemana = generarFechaSegura(fechaVal).getDay();
+                if (diaSemana === 4 || diaSemana === 5) {
+                    sesiones = horarios.Secundaria.jueves_viernes;
+                } else {
+                    sesiones = horarios.Secundaria.lunes_miercoles;
+                }
+            } else {
+                sesiones = horarios.Infantil_Primaria[tipoCalendario] || horarios.Infantil_Primaria["octubre_mayo"];
+            }
+
+            for (var i = 0; i < sesiones.length; i++) {
+                var hora = sesiones[i];
+                var label = document.createElement('label');
+                label.className = 'slot-checkbox';
+                
+                var checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.name = 'franjasProfesor';
+                checkbox.value = hora;
+                
+                label.appendChild(checkbox);
+                label.appendChild(document.createTextNode('Sesión ' + (i + 1) + ': ' + hora));
+                grid.appendChild(label);
+            }
+        }
+
+        document.getElementById('etapaMateria').addEventListener('change', detectarMesYHorario);
+        document.getElementById('fechaAusencia').addEventListener('change', detectarMesYHorario);
+        document.getElementById('calendarioTipo').addEventListener('change', actualizarFranjasHorarias);
+
+        function seleccionarTodas(valor) {
+            var checkboxes = document.querySelectorAll('input[name="franjasProfesor"]');
+            for (var i = 0; i < checkboxes.length; i++) { checkboxes[i].checked = valor; }
+        }
+
+        document.getElementById('formAusenciaProfesor').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmit');
+            
+            const selectEl = document.getElementById('nombreProfesor');
+            const nombreText = selectEl.options[selectEl.selectedIndex].text;
+            
+            const fecha = document.getElementById('fechaAusencia').value;
+            const materia = document.getElementById('etapaMateria').value;
+            
+            const checkboxes = document.querySelectorAll('input[name="franjasProfesor"]:checked');
+            if (checkboxes.length === 0) { 
+                Swal.fire({
+                    title: 'Atención',
+                    text: 'Por favor, selecciona al menos una sesión afectada.',
+                    icon: 'warning',
+                    confirmButtonText: 'Entendido'
+                }); 
+                return; 
+            }
+
+            var franjas = [];
+            for (var i = 0; i < checkboxes.length; i++) { franjas.push(checkboxes[i].value); }
+
+            var diasLetras = ["DOMINGO", "LUNES", "MARTES", "MIÉRCOLES", "JUEVES", "VIERNES", "SÁBADO"];
+            var diaSemanaNombre = diasLetras[generarFechaSegura(fecha).getDay()];
+
+            btn.disabled = true;
+            btn.innerText = "Enviando solicitud...";
+
+            const archivoInput = document.getElementById('justificanteArchivo');
+            const archivo = archivoInput.files[0];
+
+            const payload = {
+                nombre: nombreText, 
+                fecha: fecha,
+                diaSemana: diaSemanaNombre, 
+                franjaHora: franjas.join(', '), 
+                materia: materia,
+                enlaceJustificante: ""
+            };
+
+            if (archivo) {
+                var lector = new FileReader();
+                lector.onload = function(evt) {
+                    var objArchivo = {
+                        bytes: evt.target.result,
+                        mimeType: archivo.type,
+                        nombreOriginal: archivo.name
+                    };
+                    google.script.run
+                        .withSuccessHandler(function(urlDrive) {
+                            payload.enlaceJustificante = urlDrive;
+                            enviarAlServidor(payload);
+                        })
+                        .withFailureHandler(function(err){
+                            Swal.fire({
+                                title: 'Error',
+                                text: 'Error al subir el archivo adjunto: ' + err.message,
+                                icon: 'error',
+                                confirmButtonText: 'Cerrar'
+                            });
+                            btn.disabled = false;
+                            btn.innerText = "Enviar Notificación de Ausencia";
+                        })
+                        .subirTareaA_Drive(objArchivo, nombreText);
+                };
+                lector.readAsDataURL(archivo);
+            } else {
+                enviarAlServidor(payload);
+            }
+        });
+
+        function enviarAlServidor(payload) {
+            const btn = document.getElementById('btnSubmit');
+            google.script.run
+                .withSuccessHandler(function(res) {
+                    btn.disabled = false;
+                    btn.innerText = "Enviar Notificación de Ausencia";
+                    if(res) {
+                        // Mensaje de éxito limpio con tic verde de SweetAlert2
+                        Swal.fire({
+                            title: '¡Registrado!',
+                            text: 'Tu ausencia se ha registrado con éxito.',
+                            icon: 'success',
+                            confirmButtonText: 'Aceptar'
+                        });
+                        document.getElementById('formAusenciaProfesor').reset();
+                        detectarMesYHorario();
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'Hubo un error al procesar el envío. Contacta con administración.',
+                            icon: 'error',
+                            confirmButtonText: 'Cerrar'
+                        });
+                    }
+                })
+                .withFailureHandler(function(err){
+                    Swal.fire({
+                        title: 'Error de conexión',
+                        text: 'No se pudo guardar la ausencia: ' + err.message,
+                        icon: 'error',
+                        confirmButtonText: 'Cerrar'
+                    });
+                    btn.disabled = false;
+                    btn.innerText = "Enviar Notificación de Ausencia";
+                })
+                .registrarAusenciaDesdeWeb(payload);
+        }
+    </script>
+</body>
+</html>
