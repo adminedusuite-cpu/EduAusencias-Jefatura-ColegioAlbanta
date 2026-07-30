@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="appTitle">Cargando Portal de Jefatura...</title>
+    
+    <!-- Icono y accesos directos móviles -->
+    <link rel="icon" id="favicon" href="logo-jefatura.png" type="image/png">
+    <link rel="apple-touch-icon" id="appleTouch" href="logo-jefatura.png">
+    <link rel="apple-touch-icon-precomposed" id="appleTouchPre" href="logo-jefatura.png">
+    
+    <meta name="apple-mobile-web-app-title" id="appleAppTitle" content="Jefatura">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+
+    <style>
+        :root {
+            --color-fondo: #f8fafc;
+            --color-texto: #64748b;
+            --color-error: #ef4444;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--color-fondo);
+            margin: 0;
+        }
+
+        .container {
+            text-align: center;
+            padding: 20px;
+            max-width: 400px;
+        }
+
+        .logo {
+            max-width: 110px;
+            height: auto;
+            animation: pulse 2s infinite;
+        }
+
+        .mensaje {
+            color: var(--color-texto);
+            margin-top: 20px;
+            font-weight: 500;
+            font-size: 15px;
+        }
+
+        .error-box {
+            display: none;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: var(--color-error);
+            padding: 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            line-height: 1.5;
+            text-align: left;
+            margin-top: 20px;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.9; }
+            50% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.9; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <img id="appLogo" src="logo-jefatura.png" class="logo" alt="Logo Portal Jefatura">
+        <p id="appStatus" class="mensaje">Abriendo el portal de jefatura...</p>
+        
+        <div id="errorBox" class="error-box">
+            <strong>Configuración pendiente:</strong><br>
+            Debes definir la variable <code>WEB_APP_URL</code> en este archivo HTML con la URL desplegada de Google Apps Script.
+        </div>
+    </div>
+
+    <script>
+        /* ==========================================================================
+           CONFIGURACIÓN GLOBAL DE LA APLICACIÓN (MARCA BLANCA)
+           ========================================================================== */
+        
+        // 1. URL de Google Apps Script (Sustituir por la URL ejecutable de cada cliente)
+        const WEB_APP_URL = "REEMPLAZAR_POR_TU_URL_DE_APPS_SCRIPT"; 
+
+        // 2. Parámetros de la app
+        const PARAMS = "?p=admin"; 
+
+        // 3. Textos e imágenes configurables
+        const CONFIG = {
+            nombreCentro: "Jefatura de Estudios",
+            logoPath: "logo-jefatura.png",
+            textoCarga: "Abriendo el portal de jefatura..."
+        };
+
+        /* ==========================================================================
+           LÓGICA DE INICIALIZACIÓN Y REDIRECCIÓN
+           ========================================================================== */
+        
+        function inicializarPortal() {
+            // Aplicar configuraciones de interfaz
+            document.title = CONFIG.nombreCentro;
+            document.getElementById('appTitle').innerText = CONFIG.nombreCentro;
+            document.getElementById('appleAppTitle').setAttribute('content', CONFIG.nombreCentro);
+            document.getElementById('appStatus').innerText = CONFIG.textoCarga;
+
+            // Actualizar iconos
+            if (CONFIG.logoPath) {
+                document.getElementById('appLogo').src = CONFIG.logoPath;
+                document.getElementById('favicon').href = CONFIG.logoPath;
+                document.getElementById('appleTouch').href = CONFIG.logoPath;
+                document.getElementById('appleTouchPre').href = CONFIG.logoPath;
+            }
+
+            // Validar URL y Redirigir
+            if (!WEB_APP_URL || WEB_APP_URL.includes("REEMPLAZAR_POR_TU_URL")) {
+                document.getElementById('appStatus').style.display = 'none';
+                document.getElementById('appLogo').style.animation = 'none';
+                document.getElementById('errorBox').style.display = 'block';
+                return;
+            }
+
+            // Redirección suave
+            const destino = WEB_APP_URL + PARAMS;
+            setTimeout(() => {
+                window.location.href = destino;
+            }, 800);
+        }
+
+        // Ejecutar al cargar la página
+        window.addEventListener('DOMContentLoaded', inicializarPortal);
+    </script>
+</body>
+</html>
